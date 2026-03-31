@@ -70,7 +70,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6 bug fix"
+git commit -m "v0.6.1 'Open Api' link added in frontend homepage"
 git push -u origin main
 ---
 git log --oneline  # commit history
