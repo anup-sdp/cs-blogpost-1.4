@@ -9,8 +9,8 @@
 # part 13, https://www.youtube.com/watch?v=f1zggIOxmJg&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=13&t=177s (Pagination - Loading More Data with Query Parameters)
 
 cmd:
-python -m venv myenv
-myenv\Scripts\activate
+python -m venv venv
+venv\Scripts\activate
 part 7:
 pip install "fastapi[standard]" sqlalchemy aiosqlite
 aiosqlite: async driver for sqlite
@@ -23,11 +23,6 @@ run app:
 fastapi dev main.py
 or, uvicorn main:app --reload
 
----
-users:
-username: anup30, email: anup30@example.com, pw: aB@12345
-username: kasem, email: kasem@example.com, pw: aB@12345
----
 part 10:
 pip install "pwdlib[argon2]" # (recommended) securely hash user passwords (passlib is older)
 pip install pyjwt # provides tools to encode/decode JWT tokens (e.g., creating tokens on login, verifying tokens in protected routes)(alternative: python-jose)
@@ -46,9 +41,25 @@ removed jinja2 templating red squiggy lines on infile js template syntax {{var_n
 learn more about: attribute_names(in posts.py), 
 
 ----
+fastapi cloud deployment:
 prepare to host in fastapi cloud, sqlite -> postgres, profile image picture saved in db column
-eg. profile_image = Column(LargeBinary, nullable=True)  # maps to BYTEA
+eg. rofile_image: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)  # maps to BYTEA 
+
+pip install asyncpg
+make necessary changes in codes
+fastapi deploy --(to fastapi cloud, linked to email: anup30coc@gmail.com)
+
+app logs: https://dashboard.fastapicloud.com/anup30coc-42cdc718/apps/blogpost/deployments/6f0e5509-6ec4-4375-8231-21ef43668fab
+
+live: https://blogpost.fastapicloud.dev/
+users: 
+anup30 anup30@example.com pw: aB@12345
 ----
+
+---
+todo: add create a new blog button in ui
+---
+
 =====
 git:
 git init
@@ -59,7 +70,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "add part-12"
+git commit -m "v0.5 fastapi cloud deploy"
 git push -u origin main
 ---
 git log --oneline  # commit history

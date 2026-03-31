@@ -24,7 +24,8 @@ from routers import posts, users
 async def lifespan(_app: FastAPI):
     # Startup
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all) # --- run_sync(), create_all() is NOT async, In production should use Alembic migrations instead.
+        await conn.run_sync(Base.metadata.create_all) # this creates tables if they don't exist -----
+        # --- run_sync(), create_all() is NOT async, In production should use Alembic migrations instead.
         # run_sync() exists because some ORM operations are inherently synchronous, and async SQLAlchemy provides a safe bridge to run them without breaking the event loop.
     yield
     # Shutdown
@@ -36,7 +37,7 @@ app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
 
 app.mount("/static", StaticFiles(directory="static"), name="static") # serving static files with FastAPI app, in production use a dedicated server like Nginx
-app.mount("/media", StaticFiles(directory="media"), name="media")
+# app.mount("/media", StaticFiles(directory="media"), name="media")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -198,9 +199,12 @@ async def validation_exception_handler(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
     )
 
-# myenv\Scripts\activate
+# venv\Scripts\activate
 # fastapi dev main.py
 # uvicorn main:app --reload
+
+# http://127.0.0.1:8000/
+# http://127.0.0.1:8000/docs
 
 # question: how oauth2 is being used instead of just jwt tokens? -----
 

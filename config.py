@@ -13,13 +13,13 @@ class Settings(BaseSettings):
     )
     
     debug: bool = True # fields in .env will override these defaults
-    database_url: str = "sqlite+aiosqlite:///./blog.db"
+    database_url: str
 
     secret_key: SecretStr = "my-secret-key-2026"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    max_upload_size_bytes: int = 2 * 1024 * 1024  # 2 MB
+    max_image_size_bytes: int = 512 * 1024  # 512 KB   # default, overridden by .env
     
     posts_per_page: int = 10
 

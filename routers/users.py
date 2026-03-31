@@ -2,17 +2,18 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, Query
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from PIL import UnidentifiedImageError  # for pillow error when trying to open a non-image file
+# from PIL import UnidentifiedImageError  # for pillow error when trying to open a non-image file
 from starlette.concurrency import run_in_threadpool
-from image_utils import delete_profile_image, process_profile_image
+# from image_utils import delete_profile_image, process_profile_image
+from fastapi.responses import Response
 
 
-import models
+import models, schemas
 from auth import (CurrentUser, create_access_token, hash_password, verify_password,)
 from config import settings
 from database import get_db
@@ -96,16 +97,6 @@ async def login_for_access_token(
 @router.get("/me", response_model=UserPrivate)
 async def get_current_user(current_user: CurrentUser):
     return current_user
-
-
-# returns public info of any user by user_id
-@router.get("/{user_id}", response_model=UserPublic)
-async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
-    user = result.scalars().first()
-    if user:
-        return user
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
 @router.get("/{user_id}/posts", response_model=PaginatedPostsResponse)
@@ -217,21 +208,17 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    
-    old_filename = user.image_file
-
+    # image_data is in DB and deleted automatically via cascade
     await db.delete(user)
     await db.commit()
 
-    if old_filename:
-        delete_profile_image(old_filename)
 
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 
 @router.patch("/{user_id}/picture", response_model=UserPrivate)
 async def upload_profile_picture(
     user_id: int,
-    file: UploadFile,  # the file is sent as form-data, not json, so we can't use pydantic model for it, we have to use UploadFile from fastapi
-    # ^ file.filename, file.content_type, file.size, file.read(), file.close() are available
+    file: UploadFile,
     current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
@@ -240,43 +227,97 @@ async def upload_profile_picture(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this user's picture",
         )
-    if file.size and file.size > settings.max_upload_size_bytes:
-        await file.close() # Close early! before reading the whole file into memory,
+
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        await file.close()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File too large. Maximum size is {settings.max_upload_size_bytes // (1024 * 1024)}MB",
-        )
-    
-    content = await file.read() # as a bytes object
-    await file.close() # recommended to close
-    # bacause file.size is not reliable,
-    if len(content) > settings.max_upload_size_bytes:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Actual file size exceeds limit of{settings.max_upload_size_bytes // (1024 * 1024)}MB"
+            detail="Invalid image type. Please upload PNG, JPEG, GIF, or WebP.",
         )
 
-    try:
-        new_filename = await run_in_threadpool(process_profile_image, content) 
-        # process_profile_image is a CPU-bound function, so we run it in a threadpool to avoid blocking the event loop, we pass the content
-        # if you run a heavy, "blocking" task directly inside an async def function, you freeze the entire server for everyone else until that task is done.
-        # Most image libraries (like Pillow/PIL) are synchronous. They don't have an await version for saving or resizing.
-    except UnidentifiedImageError as err:
+    # Check Content-Length header first (fast path, not always present)
+    if file.size and file.size > settings.max_image_size_bytes:
+        await file.close()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid image file. Please upload a valid image (JPEG, PNG, GIF, WebP).",
-        ) from err
+            detail="Image too large. Maximum size is 500 KB. Recommended: 200x200 px.",
+        )
 
-    old_filename = current_user.image_file
-    current_user.image_file = new_filename
+    content = await file.read()
+    await file.close()
+
+    # Check actual byte length (reliable — file.size header can be spoofed)
+    if len(content) > settings.max_image_size_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Image too large. Maximum size is 500 KB. Recommended: 200x200 px.",
+        )
+
+    current_user.image_data = content
+    current_user.image_content_type = file.content_type
     await db.commit()
     await db.refresh(current_user)
-
-    if old_filename:
-        delete_profile_image(old_filename)
-
     return current_user
 
+# new add
+@router.get("/{user_id}/picture")
+async def get_profile_picture(
+    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+
+    if not user or not user.image_data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No profile picture")
+
+    return Response(
+        content=user.image_data,
+        media_type=user.image_content_type or "image/jpeg",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+
+
+@router.patch("/{user_id}/picture", response_model=schemas.UserPublic)
+async def update_profile_picture(
+    user_id: int,
+    file: Annotated[UploadFile, File()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file type '{file.content_type}'. Use JPEG, PNG, GIF, or WebP.",
+        )
+
+    # Read and enforce 500 KB limit
+    image_bytes = await file.read()
+    if len(image_bytes) > settings.max_image_size_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=(
+                f"Image too large ({len(image_bytes) // 1024} KB). "
+                "Maximum size is 500 KB. Recommended size: 200x200 px."
+            ),
+        )
+
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    user.image_data = image_bytes
+    user.image_content_type = file.content_type
+    await db.commit()
+    await db.refresh(user)
+    return user
 
 @router.delete("/{user_id}/picture", response_model=UserPrivate)
 async def delete_user_picture(
@@ -290,18 +331,29 @@ async def delete_user_picture(
             detail="Not authorized to delete this user's picture",
         )
 
-    old_filename = current_user.image_file
-
-    if old_filename is None:
+    if current_user.image_data is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No profile picture to delete",
         )
 
-    current_user.image_file = None
+    current_user.image_data = None
+    current_user.image_content_type = None
     await db.commit()
     await db.refresh(current_user)
-
-    delete_profile_image(old_filename)
-
     return current_user
+
+# returns public info of any user by user_id
+@router.get("/{user_id}", response_model=UserPublic)
+async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if user:
+        return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+"""
+^
+ Router order matters. In your router, /{user_id} (integer) and /{user_id}/picture are both GET routes. 
+ FastAPI matches top to bottom, so make sure GET /{user_id}/picture is defined before 
+ GET /{user_id} — otherwise the /picture segment gets swallowed as a user_id. - claude sonnet 4.6
+"""

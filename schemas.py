@@ -23,8 +23,8 @@ class UserPublic(BaseModel):
 
     id: int
     username: str
-    image_file: str | None
-    image_path: str
+    # image_file: str | None
+    image_path: str  # property on model: /api/users/{id}/picture or default
 
 
 class UserPrivate(UserPublic):

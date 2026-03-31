@@ -1,8 +1,9 @@
+# models.py:
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -15,11 +16,9 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
-    image_file: Mapped[str | None] = mapped_column(
-        String(200),
-        nullable=True,
-        default=None,
-    )
+    # image_file: Mapped[str | None] = mapped_column(String(200), nullable=True, default=None,) # older
+    image_data: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True, default=None)
+    image_content_type: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
 
     posts: Mapped[list[Post]] = relationship(
         back_populates="author",
