@@ -1,0 +1,16 @@
+venv/
+.venv/
+myenv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.idea/
+.vscode/
+instance/
+*.sqlite3
+*.log
+
+### Database Files ###
+# *.sqlite3
+# *.db

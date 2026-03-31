@@ -1,0 +1,40 @@
+==================
+in cmd:
+python -m venv myenv  (with default python version)
+myenv\Scripts\activate -------------
+pip install django
+python --version --(3.13)
+pip list --(show installed packages in this venv)
+pip -v  --(show options)
+pip -V --(show running location of venv)
+
+-----
+select the correct python interpreter in vs code:
+Press Ctrl+Shift+P
+Type "Python: Select Interpreter"
+Choose the Python interpreter that matches the virtual environment where you installed Django and DRF
+
+
+=============
+venv with python 3.11:
+"C:\Program Files\Python311\python.exe" -m venv venv
+venv\Scripts\activate  ---
+python --version    : Python 3.11.9
+
+pip list : see installed packages in this environment
+pip install -r requirements.txt
+pip freeze > requirements.txt (write requirements.txt)
+
+
+"""
+venv\Scripts\activate
+fastapi dev main.py
+uvicorn main:app --reload
+ctrl+c
+
+http://127.0.0.1:8000/
+http://127.0.0.1:8000/docs
+"""
+
+
+
