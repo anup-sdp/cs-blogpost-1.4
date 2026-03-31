@@ -57,7 +57,7 @@ anup30 anup30@example.com pw: aB@12345
 ----
 
 ---
-todo: add create a new blog button in ui
+todo: ...
 ---
 
 =====
@@ -70,7 +70,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.5 fastapi cloud deploy"
+git commit -m "v0.6 bug fix"
 git push -u origin main
 ---
 git log --oneline  # commit history

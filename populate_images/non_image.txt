@@ -1,3 +1,0 @@
-non image file.
-will be rejected if uploaded as profile image. 
-:)

@@ -10,6 +10,7 @@ __pycache__/
 instance/
 *.sqlite3
 *.log
+.fastapicloud/
 
 ### Database Files ###
 # *.sqlite3

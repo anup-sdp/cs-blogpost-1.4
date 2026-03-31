@@ -27,9 +27,9 @@ class User(Base):
 
     @property
     def image_path(self) -> str:
-        if self.image_file:
-            return f"/media/profile_pics/{self.image_file}"
-        return "/static/profile_pics/default.jpg"
+        if self.image_data:
+            return f"/api/users/{self.id}/picture"  # serves from DB
+        return "/static/profile_pics/default.jpg"   # fallback default
 
 
 class Post(Base):
