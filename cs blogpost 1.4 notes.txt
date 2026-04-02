@@ -54,6 +54,7 @@ app logs: https://dashboard.fastapicloud.com/anup30coc-42cdc718/apps/blogpost/de
 live: https://blogpost.fastapicloud.dev/
 users: 
 anup30 anup30@example.com pw: aB@12345
+kasem kasem@example.com pw: aB@12345
 ----
 
 ---
@@ -70,7 +71,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6.1 'Open Api' link added in frontend homepage"
+git commit -m "v0.6.2 new user added"
 git push -u origin main
 ---
 git log --oneline  # commit history
