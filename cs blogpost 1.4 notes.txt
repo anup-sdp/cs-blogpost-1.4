@@ -55,7 +55,7 @@ app logs: https://dashboard.fastapicloud.com/anup30coc-42cdc718/apps/blogpost/de
 
 live: https://blogpost.fastapicloud.dev/
 users: 
-anup30 anupbarua30@gmail.com pw: aB@12345b
+anup30 anupbarua30@gmail.com pw: aB@12345c
 
 ----
 
@@ -83,7 +83,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6.6 with password reset feature with mailtrap sandbox"
+git commit -m "v0.6.7 with password reset feature with google smtp email"
 git push -u origin main
 ---
 git log --oneline  # commit history

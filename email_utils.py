@@ -1,3 +1,6 @@
+# email_utils.py
+# email utility functions for sending emails asynchronously
+
 from email.message import EmailMessage
 
 import aiosmtplib # async SMTP client library  # async version of smtplib
