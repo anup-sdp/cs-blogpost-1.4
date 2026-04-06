@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 
 import models
 from auth import CurrentUser
+from config import settings
 from database import get_db
 from schemas import PostCreate, PostResponse, PostUpdate, PaginatedPostsResponse
 
@@ -18,7 +19,7 @@ router = APIRouter()
 async def get_posts(
     db: Annotated[AsyncSession, Depends(get_db)],
     skip: Annotated[int, Query(ge=0)] = 0, # query parameters with validation, skip must be >= 0
-    limit: Annotated[int, Query(ge=1, le=100)] = 10, # limit must be between 1 and 100, default is 10
+    limit: Annotated[int, Query(ge=1, le=100)] = settings.posts_per_page, # limit must be between 1 and 100, default is 10
 ):    
     # ^ Annotated used (recommended)  # or db: AsyncSession = Depends(get_db) # functionally equivalent, Both inject the DB session
     # meaning: Type is AsyncSession, Dependency provider is get_db

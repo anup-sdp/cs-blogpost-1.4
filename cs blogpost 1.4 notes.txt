@@ -7,7 +7,7 @@
 # part 11, https://www.youtube.com/watch?v=MY0TFMMm9B0&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=11&t=11s (Authorization - Protecting Routes and Verifying Current User)
 # part 12, https://www.youtube.com/watch?v=AExumWjfbyo&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=12&t=133s (File Uploads - Image Processing, Validation, and Storage)
 # part 13, https://www.youtube.com/watch?v=f1zggIOxmJg&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=13&t=177s (Pagination - Loading More Data with Query Parameters)
-
+# part 14, https://www.youtube.com/watch?v=4HxjBvZMAg8&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=14 (Password Reset - Email, Tokens, and Background Tasks)
 cmd:
 python -m venv venv
 venv\Scripts\activate
@@ -42,23 +42,35 @@ learn more about: attribute_names(in posts.py),
 
 ----
 fastapi cloud deployment:
-prepare to host in fastapi cloud, sqlite -> postgres, profile image picture saved in db column
+prepare to host in fastapi cloud, sqlite -> postgres, profile image picture saved in db column (at neon of anup30coc@gmail.com) ---
 eg. rofile_image: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)  # maps to BYTEA 
 
+pip uninstall aiosqlite
 pip install asyncpg
 make necessary changes in codes
+not using image_utils.py anymore as profile image is now saved in postgres
 fastapi deploy --(to fastapi cloud, linked to email: anup30coc@gmail.com)
 
 app logs: https://dashboard.fastapicloud.com/anup30coc-42cdc718/apps/blogpost/deployments/6f0e5509-6ec4-4375-8231-21ef43668fab
 
 live: https://blogpost.fastapicloud.dev/
 users: 
-anup30 anup30@example.com pw: aB@12345
-kasem kasem@example.com pw: aB@12345
+anup30 anupbarua30@gmail.com pw: aB@12345b
+
 ----
 
+part 14: at 49:10 -----
+pip install aiosmtplib 
+aiosmtplib: send emails in async applications without blocking the event loop. it's an asynchronous SMTP client library for Python's asyncio framework
+email-validator: already installed with standard fastapi 
+mailtrap: email sandbox > start testing > add sandbox
+(alternatives: MailerSend, Resend, Brevo)
 ---
-todo: ...
+todo: 
+  add pyproject.toml (+uv, recommended alternative to requirements.txt), 
+  convert BackgroundTasks to Celery
+to understand: 
+  how password reset token is generated and verified, why jwt token not used instead.
 ---
 
 =====
@@ -71,7 +83,23 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6.2 new user added"
+git commit -m "v0.6.6 with password reset feature with mailtrap sandbox"
 git push -u origin main
 ---
 git log --oneline  # commit history
+
+
+
+============
+using pip vs uv:
+
+ The Manual Way (Old)            The uv Way (Modern)                      
+------------------------------------------------------------------------
+ python -m venv .venv            uv venv (or just let uv run create it)   
+ source .venv/bin/activate       Optional. Just use uv run <command>      
+ pip install fastapi             uv add fastapi                           
+ pip freeze > requirements.txt   Automatically handled in uv.lock         
+------------------------------------------------------------------------
+run app: uv run uvicorn main:app
+
+

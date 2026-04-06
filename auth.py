@@ -1,4 +1,6 @@
 # auth.py
+import hashlib
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -23,6 +25,28 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
+
+# password reset token generation and hashing functions, for password reset flow
+def generate_reset_token() -> str:
+    return secrets.token_urlsafe(32)  
+"""
+secrets.token_urlsafe(32):
+belongs to Python's built-in secrets module, 
+secure, random strings that are safe to use in URLs, 
+it is frequently used in FastAPI applications for things like API keys, password reset tokens, or session IDs.
+actual string length is around 43 characters
+"""
+
+
+def hash_reset_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+"""
+Even though a token_urlsafe(32) string is already random, storing it in 'plain text' in database is a security risk.
+When the user clicks the email link, app takes the token from the URL, 
+hashes it again using this function, and checks if it matches the hash in the DB.
+Key Properties of SHA-256: Deterministic, Irreversible, Collision Resistant, fast 
+it's excellent for tokens, but for passwords use 'slower' algorithms like BCrypt or Argon2
+"""
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:

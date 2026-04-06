@@ -1,4 +1,4 @@
-# populate_db.py, my custom
+# populate_db.py, my custom / make needed changes for (class PasswordResetToken added in models) ... await db.execute(delete(models.PasswordResetToken))
 import asyncio
 import hashlib
 from datetime import datetime, timedelta, timezone
