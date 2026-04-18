@@ -61,6 +61,7 @@ class PostResponse(PostBase):
     id: int
     user_id: int
     date_posted: datetime
+    likes: int # added to test alembic migrations
     author: UserPublic
 
 

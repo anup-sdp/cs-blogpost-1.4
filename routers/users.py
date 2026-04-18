@@ -415,7 +415,7 @@ async def reset_password(
             detail="Invalid or expired reset token",
         )
 
-    if reset_token.expires_at.replace(tzinfo=UTC) < datetime.now(UTC): # expired token, can remove .replace(tzinfo=UTC) as we're using postgres now with DateTime(timezone=True) in models,
+    if reset_token.expires_at < datetime.now(UTC): # expired token
         await db.delete(reset_token)
         await db.commit()
         raise HTTPException(

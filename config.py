@@ -12,10 +12,10 @@ class Settings(BaseSettings):
         extra="allow",
     )
     
-    debug: bool = True # fields in .env will override these defaults
+    debug: bool = True
     database_url: str
 
-    secret_key: SecretStr = "my-secret-key-2026"
+    secret_key: SecretStr = "my-secret-key-2026"  # fields in .env will override these defaults
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 

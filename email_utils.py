@@ -4,8 +4,9 @@
 from email.message import EmailMessage
 
 import aiosmtplib # async SMTP client library  # async version of smtplib
+# checkout alternative: fastapi-mail package
 from fastapi.templating import Jinja2Templates
-
+import ssl
 from config import settings
 
 templates = Jinja2Templates(directory="templates")
@@ -26,6 +27,12 @@ async def send_email(
 
     if html_content:
         message.add_alternative(html_content, subtype="html")
+    # Python 3.13+ SSL Fix:
+    context = ssl.create_default_context()
+    try:
+        context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+    except AttributeError:
+        pass  # VERIFY_X509_STRICT not available in older Python versions
 
     await aiosmtplib.send(
         message,
@@ -34,6 +41,7 @@ async def send_email(
         username=settings.mail_username or None,
         password=settings.mail_password.get_secret_value() or None,
         start_tls=settings.mail_use_tls,
+        tls_context=context,
     )
 
 

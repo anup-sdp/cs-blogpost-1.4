@@ -8,6 +8,7 @@
 # part 12, https://www.youtube.com/watch?v=AExumWjfbyo&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=12&t=133s (File Uploads - Image Processing, Validation, and Storage)
 # part 13, https://www.youtube.com/watch?v=f1zggIOxmJg&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=13&t=177s (Pagination - Loading More Data with Query Parameters)
 # part 14, https://www.youtube.com/watch?v=4HxjBvZMAg8&list=PL-osiE80TeTsak-c-QsVeg0YYG_0TeyXI&index=14 (Password Reset - Email, Tokens, and Background Tasks)
+# part 15, https://www.youtube.com/watch?v=e8NnDz8uT7o&t=556s (PostgreSQL and Alembic - Database Migrations)
 cmd:
 python -m venv venv
 venv\Scripts\activate
@@ -55,11 +56,11 @@ app logs: https://dashboard.fastapicloud.com/anup30coc-42cdc718/apps/blogpost/de
 
 live: https://blogpost.fastapicloud.dev/
 users: 
-anup30 anupbarua30@gmail.com pw: aB@12345c
+anup30 anupbarua30@gmail.com pw: aB@12345d
 
 ----
 
-part 14: at 49:10 -----
+part 14:
 pip install aiosmtplib 
 aiosmtplib: send emails in async applications without blocking the event loop. it's an asynchronous SMTP client library for Python's asyncio framework
 email-validator: already installed with standard fastapi 
@@ -72,6 +73,23 @@ todo:
 to understand: 
   how password reset token is generated and verified, why jwt token not used instead.
 ---
+part 15:
+pip install alembic   // database migration tool for SQLAlchemy
+pip install asyncpg // for postgresql
+run: alembic init -t async alembic  // initialize Alembic
+in alembic.ini and env.py changed lines are marked with comment: # ---
+run: 
+  alembic revision --autogenerate -m "Initial migration"  // create migration -> in alembic/versions new file created
+  alembic upgrade head  // apply migration
+for test: add likes field to Post model (schema change ? ---)
+run:
+  alembic revision --autogenerate -m "add likes field to Post model" 
+  alembic upgrade head
+
+
+uv initialized
+uv run uvicorn main:app --reload -----
+
 
 =====
 git:
@@ -83,7 +101,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6.7 with password reset feature with google smtp email"
+git commit -m "v0.6.8 bug fix"
 git push -u origin main
 ---
 git log --oneline  # commit history

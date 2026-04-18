@@ -1,0 +1,47 @@
+deactivate and remove previous venv to avoid conflicts
+---
+uv init  (pyproject.toml .python-version .git .gitignore README.md created)
+uv add -r requirements.txt
+uv sync (Synchronize the environment - creates a new uv-managed virtual environment and installs dependencies)
+or, uv sync --python 3.12 (specify one)
+uv --version
+uv pip list
+uv run uvicorn main:app --reload
+
+ Task                  Command                                   
+------------------------------------------
+ Add a package         uv add fastapi      
+ Remove a package      uv remove fastapi
+ Sync environment      uv sync (matches .venv to your lockfile)
+ Update all packages   uv lock --upgrade
+
+For one-off scripts: 
+uv run python my_script.py
+or, uv run my_script.py <------------
+Running Scripts Without Installation: uv run --with requests my_script.py
+
+List available versions: uv python list
+Install a specific version: uv python install 3.12
+Pin project version (creates or updates .python-version): uv python pin 3.12
+
+************************
+after adding more packages to uv, we can still keep requirements.txt, to update: uv export > requirements.txt
+or, professional: uv export --no-hashes --no-header --no-annotate --no-dev --output-file requirements.txt
+************************
+
+git init
+git add .
+git commit -m "initialize project with uv"
+
+===========
+see installed python versions(without uv):
+cmd/pwsh:
+D:\fastapi apps\fastapi_tutorial_Genalytiq>where.exe python
+C:\Program Files\Python311\python.exe
+C:\msys64\ucrt64\bin\python.exe
+C:\Program Files\Python314\python.exe
+C:\Program Files\Python313\python.exe
+C:\Users\Anup\AppData\Local\Microsoft\WindowsApps\python.exe
+
+D:\fastapi apps\fastapi_tutorial_Genalytiq>which python
+/c/Program Files/Python311/python

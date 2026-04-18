@@ -17,16 +17,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import models
 from config import settings
-from database import Base, engine, get_db
+from database import engine, get_db
 from routers import posts, users
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    # Startup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all) # this creates tables if they don't exist -----
-        # --- run_sync(), create_all() is NOT async, In production should use Alembic migrations instead.
-        # run_sync() exists because some ORM operations are inherently synchronous, and async SQLAlchemy provides a safe bridge to run them without breaking the event loop.
+    # removed create_all for alembic migrations
     yield
     # Shutdown
     await engine.dispose()
@@ -219,9 +215,10 @@ async def validation_exception_handler(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
     )
 
-# venv\Scripts\activate
+# .venv\Scripts\activate
 # fastapi dev main.py
 # uvicorn main:app --reload
+# uv run uvicorn main:app --reload
 
 # http://127.0.0.1:8000/
 # http://127.0.0.1:8000/docs
