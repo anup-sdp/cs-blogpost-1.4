@@ -45,3 +45,4 @@ C:\Users\Anup\AppData\Local\Microsoft\WindowsApps\python.exe
 
 D:\fastapi apps\fastapi_tutorial_Genalytiq>which python
 /c/Program Files/Python311/python
+

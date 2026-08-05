@@ -67,8 +67,7 @@ email-validator: already installed with standard fastapi
 mailtrap: email sandbox > start testing > add sandbox
 (alternatives: MailerSend, Resend, Brevo)
 ---
-todo: 
-  add pyproject.toml (+uv, recommended alternative to requirements.txt), 
+todo:  
   convert BackgroundTasks to Celery
 to understand: 
   how password reset token is generated and verified, why jwt token not used instead.
@@ -101,7 +100,7 @@ git remote add origin https://github.com/anup-sdp/cs-blogpost-1.4.git
 git push -u origin main
 =====
 git add .
-git commit -m "v0.6.8 bug fix"
+git commit -m "v0.6.9 update readme"
 git push -u origin main
 ---
 git log --oneline  # commit history
